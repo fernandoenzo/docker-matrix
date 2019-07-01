@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e  # Exit immediately if a command exits with a non-zero status.
+set -x  # All executed commands are printed to the terminal
+
+export DEBIAN_FRONTEND=noninteractive
+
+aptitude update ; aptitude install -y matrix-synapse
+
+# Command for manually registering users in Matrix
+echo "register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
+
+# Set the server domain
+echo "server_name: example.com" > /etc/matrix-synapse/conf.d/server_name.yaml
+
+# Remove some lines related to TLS certificates in the init script so the server can start
+sed -i '62,66d;68,72d' /etc/init.d/matrix-synapse
+
+# Generate a new config file after deleting the default one
+rm /etc/matrix-synapse/homeserver.yaml
+python3 -m synapse.app.homeserver --server-name example.com --config-path /etc/matrix-synapse/homeserver.yaml --generate-config --report-stats=no
+rm /etc/matrix-synapse/example.com.log.config
+rm /etc/matrix-synapse/example.com.signing.key
+
+# Modify the config file for proper run
+sed -i 's/^server_name/#server_name/' /etc/matrix-synapse/homeserver.yaml
+sed -i '/^pid_file/c\pid_file: "/var/run/matrix-synapse.pid"' /etc/matrix-synapse/homeserver.yaml
+sed -i '/^log_config/c\log_config: "/etc/matrix-synapse/log.yaml"' /etc/matrix-synapse/homeserver.yaml
+sed -i '/^media_store_path/c\media_store_path: "/var/lib/matrix-synapse/media"' /etc/matrix-synapse/homeserver.yaml
+sed -i '/^uploads_path/c\uploads_path: "/var/lib/matrix-synapse/uploads"' /etc/matrix-synapse/homeserver.yaml
+sed -i '/^signing_key_path/c\signing_key_path: "/etc/matrix-synapse/homeserver.signing.key"' /etc/matrix-synapse/homeserver.yaml
+sed -i "s/\/homeserver.db/\/var\/lib\/matrix-synapse\/homeserver.db/" /etc/matrix-synapse/homeserver.yaml
+sed -i "s/'::1', //" /etc/matrix-synapse/homeserver.yaml
+
+apt-get -y autoremove ; aptitude -y autoclean ; apt-get -y autoclean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.aptitude
