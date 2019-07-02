@@ -3,6 +3,9 @@
 set -e  # Exit immediately if a command exits with a non-zero status.
 set -x  # All executed commands are printed to the terminal
 
+mv /tmp/boot /usr/local/boot
+mv /tmp/generate_new_matrix_keys /sbin
+
 export DEBIAN_FRONTEND=noninteractive
 
 aptitude update ; aptitude install -y matrix-synapse
