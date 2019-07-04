@@ -7,11 +7,15 @@ python3 -m synapse.app.homeserver --server-name example.com --config-path /tmp/m
 SHARED_SECRET=$(grep "registration_shared_secret: " /tmp/matrix/homeserver.yaml)
 MACAROON_KEY=$(grep "macaroon_secret_key: " /tmp/matrix/homeserver.yaml)
 FORM_SECRET=$(grep "form_secret: " /tmp/matrix/homeserver.yaml)
+TURN_KEY=$(pwgen 64 1)
+TURN_SECRET="turn_shared_secret: \"$TURN_KEY\""
 
 # Replace old keys for new ones
 sed -i "/registration_shared_secret: /c$SHARED_SECRET" /etc/matrix-synapse/homeserver.yaml
 sed -i "/macaroon_secret_key: /c$MACAROON_KEY" /etc/matrix-synapse/homeserver.yaml
 sed -i "/form_secret: /c$FORM_SECRET" /etc/matrix-synapse/homeserver.yaml
+sed -i "/turn_shared_secret: /c$TURN_SECRET" /etc/matrix-synapse/homeserver.yaml
+sed -i "/static-auth-secret=/c static-auth-secret=$TURN_KEY" /etc/turnserver.conf
 
 # Clean
 rm -rf /tmp/matrix
