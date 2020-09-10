@@ -1,4 +1,4 @@
-FROM fernandoenzo/debian:testing-min
+FROM fernandoenzo/debian:10s-min
 MAINTAINER Fernando Enzo Guarini (fernandoenzo@gmail.com)
 
 COPY scripts/ /tmp
