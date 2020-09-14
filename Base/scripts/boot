@@ -3,7 +3,6 @@
 set -e
 
 service cron start > /dev/null 2>&1
-turnserver -c /etc/turnserver.conf > /dev/null 2>&1 &
 service matrix-synapse start > /dev/null 2>&1 &
 exec /bin/bash -c "$@"
 

@@ -10,7 +10,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list
 
-aptitude update ; aptitude install -t buster-backports -y matrix-synapse coturn pwgen
+aptitude update ; aptitude install -t buster-backports -y matrix-synapse pwgen
 
 # Command for manually registering users in Matrix
 echo "register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
@@ -40,12 +40,6 @@ sed -i '/turn_uris:/c\turn_uris: ["turn:turn.example.com:3478?transport=udp", "t
 
 # Generate keys
 generate_new_matrix_keys
-
-# Configuration for coturn
-sed -i 's/^#use-auth-secret/use-auth-secret/' /etc/turnserver.conf
-sed -i '/^#realm=/c realm=example.com' /etc/turnserver.conf
-sed -i '/cert=/c cert=/etc/letsEncrypt/live/turn.example.com/cert.pem' /etc/turnserver.conf
-sed -i '/pkey=/c pkey=/etc/letsEncrypt/live/turn.example.com/privkey.pem' /etc/turnserver.conf
 
 apt-get -y autoremove ; aptitude -y autoclean ; apt-get -y autoclean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.aptitude

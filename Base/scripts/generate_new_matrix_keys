@@ -15,7 +15,6 @@ sed -i "/registration_shared_secret: /c$SHARED_SECRET" /etc/matrix-synapse/homes
 sed -i "/macaroon_secret_key: /c$MACAROON_KEY" /etc/matrix-synapse/homeserver.yaml
 sed -i "/form_secret: /c$FORM_SECRET" /etc/matrix-synapse/homeserver.yaml
 sed -i "/turn_shared_secret: /c$TURN_SECRET" /etc/matrix-synapse/homeserver.yaml
-sed -i "/static-auth-secret=/c static-auth-secret=$TURN_KEY" /etc/turnserver.conf
 
 # Clean
 rm -rf /tmp/matrix
