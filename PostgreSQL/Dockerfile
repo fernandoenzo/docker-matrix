@@ -1,4 +1,4 @@
-FROM fernandoenzo/matrix:base
+FROM ghcr.io/fernandoenzo/matrix:base
 MAINTAINER Fernando Enzo Guarini (fernandoenzo@gmail.com)
 
 COPY scripts/basics /tmp
