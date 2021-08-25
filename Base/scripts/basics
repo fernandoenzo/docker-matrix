@@ -8,9 +8,9 @@ mv /tmp/generate_new_matrix_keys /sbin
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list
+echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list
 
-aptitude update ; aptitude install -t buster-backports -y matrix-synapse pwgen
+aptitude update ; aptitude install -t bullseye-backports -y matrix-synapse pwgen
 
 # Command for manually registering users in Matrix
 echo "register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
