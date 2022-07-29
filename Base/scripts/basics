@@ -13,7 +13,7 @@ echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sour
 aptitude update ; aptitude install -t bullseye-backports -y matrix-synapse pwgen
 
 # Command for manually registering users in Matrix
-echo "register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
+echo "/usr/libexec/matrix-synapse/register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
 
 # Set the server domain
 echo "server_name: example.com" > /etc/matrix-synapse/conf.d/server_name.yaml
