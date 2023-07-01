@@ -3,27 +3,32 @@
 set -e  # Exit immediately if a command exits with a non-zero status.
 set -x  # All executed commands are printed to the terminal
 
+mkdir /usr/share/matrix-synapse
+
 mv /tmp/boot /usr/local/boot
+mv /tmp/matrix-synapse.init /etc/init.d/matrix-synapse
+mv /tmp/get-config-key /usr/share/matrix-synapse/
 mv /tmp/generate_new_matrix_keys /sbin
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list
+aptitude update ; aptitude install -y ca-certificates python3-yaml
 
-aptitude update ; aptitude install -t bullseye-backports -y matrix-synapse pwgen
+gpg --no-default-keyring --keyring /tmp/temp.keyring --keyserver keyserver.ubuntu.com --recv-keys F473DD4473365DE1
+gpg -o /etc/apt/keyrings/matrix.gpg --export --no-default-keyring --keyring /tmp/temp.keyring
+echo "deb [signed-by=/etc/apt/keyrings/matrix.gpg] https://packages.matrix.org/debian/ bookworm main" >> /etc/apt/sources.list.d/matrix.list
+
+aptitude update ; aptitude install -y matrix-synapse-py3
 
 # Command for manually registering users in Matrix
-echo "/usr/libexec/matrix-synapse/register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
+echo "register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008" > /root/.bash_history
 
 # Set the server domain
 echo "server_name: example.com" > /etc/matrix-synapse/conf.d/server_name.yaml
 
-# Remove some lines related to TLS certificates in the init script so the server can start
-sed -i '62,66d;68,72d' /etc/init.d/matrix-synapse
-
 # Generate a new config file after deleting the default one
 rm /etc/matrix-synapse/homeserver.yaml
-python3 -m synapse.app.homeserver --server-name example.com --config-path /etc/matrix-synapse/homeserver.yaml --generate-config --report-stats=no
+/opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver --server-name example.com --config-path /etc/matrix-synapse/homeserver.yaml --generate-config --report-stats=no
 rm /etc/matrix-synapse/example.com.log.config
 rm /etc/matrix-synapse/example.com.signing.key
 
@@ -32,11 +37,9 @@ sed -i 's/^server_name/#server_name/' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^pid_file/c\pid_file: "/var/run/matrix-synapse.pid"' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^log_config/c\log_config: "/etc/matrix-synapse/log.yaml"' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^media_store_path/c\media_store_path: "/var/lib/matrix-synapse/media"' /etc/matrix-synapse/homeserver.yaml
-sed -i '/^uploads_path/c\uploads_path: "/var/lib/matrix-synapse/uploads"' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^signing_key_path/c\signing_key_path: "/etc/matrix-synapse/homeserver.signing.key"' /etc/matrix-synapse/homeserver.yaml
 sed -i "s/\/homeserver.db/\/var\/lib\/matrix-synapse\/homeserver.db/" /etc/matrix-synapse/homeserver.yaml
 sed -i -E "/^\s+bind_addresses/c\    bind_addresses: ['0.0.0.0']" /etc/matrix-synapse/homeserver.yaml
-sed -i '/turn_uris:/c\turn_uris: ["turn:turn.example.com:3478?transport=udp", "turn:turn.example.com:3478?transport=tcp"]' /etc/matrix-synapse/homeserver.yaml
 
 # Generate keys
 generate_new_matrix_keys

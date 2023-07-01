@@ -1,0 +1,83 @@
+#!/usr/bin/python3
+
+import argparse
+import sys
+import yaml
+from pathlib import Path
+
+
+def parse_arguments():
+    description = "Synapse config parser"
+
+    config_parser = argparse.ArgumentParser(description=description)
+    config_parser.add_argument(
+        "-c",
+        "--config-path",
+        action="append",
+        type=Path,
+        metavar="CONFIG_FILE",
+        help="Specify config file. Can be given multiple times and"
+        " may specify directories containing *.yaml files.",
+    )
+
+    config_parser.add_argument(
+        "--keys-directory",
+        metavar="DIRECTORY",
+        type=Path,
+        help="Where files such as certs and signing keys are stored when"
+        " their location is not given explicitly in the config."
+        " Defaults to the directory containing the last config file",
+    )
+    config_parser.add_argument(
+        "config_key",
+        metavar="KEY",
+        type=str,
+        help="Configuration setting to query",
+    )
+    return config_parser.parse_args()
+
+
+def find_config_files(search_paths):
+    config_files = []
+    if search_paths:
+        for config_path in search_paths:
+            if config_path.is_dir():
+                # We accept specifying directories as config paths, we search
+                # inside that directory for all files matching *.yaml, and then
+                # we apply them in *sorted* order.
+                config_files.extend(sorted(config_path.glob('*.yaml')))
+            else:
+                config_files.append(config_path)
+    return config_files
+
+
+def read_config_files(config_files):
+    specified_config = {}
+    for config_file in config_files:
+        with config_file.open() as file_stream:
+            yaml_config = yaml.safe_load(file_stream)
+
+        if not isinstance(yaml_config, dict):
+            err = "File %r is empty or doesn't parse into a key-value map. IGNORING."
+            print(err % (config_file,), file=sys.stderr)
+            continue
+
+        specified_config.update(yaml_config)
+    return specified_config
+
+
+config_args = parse_arguments()
+config_files = find_config_files(search_paths=config_args.config_path)
+if not config_files:
+    print("Must supply a config file.", file=sys.stderr)
+    sys.exit(1)
+
+if config_args.keys_directory:
+    config_dir_path = config_args.keys_directory
+else:
+    config_dir_path = config_files[-1].parent
+config_dir_path = config_dir_path.resolve()
+data_dir_path = Path.cwd()
+config_dict = read_config_files(config_files)
+
+print(config_dict[config_args.config_key])
