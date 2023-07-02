@@ -16,7 +16,7 @@ aptitude update ; aptitude install -y ca-certificates python3-yaml
 
 gpg --no-default-keyring --keyring /tmp/temp.keyring --keyserver keyserver.ubuntu.com --recv-keys F473DD4473365DE1
 gpg -o /etc/apt/keyrings/matrix.gpg --export --no-default-keyring --keyring /tmp/temp.keyring
-echo "deb [signed-by=/etc/apt/keyrings/matrix.gpg] https://packages.matrix.org/debian/ bookworm main" >> /etc/apt/sources.list.d/matrix.list
+echo "deb [signed-by=/etc/apt/keyrings/matrix.gpg] https://packages.matrix.org/debian/ bookworm main" > /etc/apt/sources.list.d/matrix.list
 
 aptitude update ; aptitude install -y matrix-synapse-py3
 
