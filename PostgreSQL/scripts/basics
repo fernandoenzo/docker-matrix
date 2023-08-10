@@ -5,7 +5,7 @@ set -x  # All executed commands are printed to the terminal
 
 # Modify the config file to use PostgreSQL instead of SQLite
 sed -i 's/sqlite3/psycopg2/' /etc/matrix-synapse/homeserver.yaml
-sed -i 's/\/var\/lib\/matrix-synapse\/homeserver.db/"synapse"/' /etc/matrix-synapse/homeserver.yaml
+sed -i 's~/var/lib/matrix-synapse/homeserver.db~"synapse"~' /etc/matrix-synapse/homeserver.yaml
 sed -i '/\sdatabase: "synapse"/a\    user: "postgres"\n    password: "postgres"\n    host: "localhost"\n    cp_min: 5\n    cp_max: 10' /etc/matrix-synapse/homeserver.yaml
 
 apt-get -y autoremove ; aptitude -y autoclean ; apt-get -y autoclean

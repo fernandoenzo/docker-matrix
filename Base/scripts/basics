@@ -12,7 +12,7 @@ mv /tmp/generate_new_matrix_keys /sbin
 
 export DEBIAN_FRONTEND=noninteractive
 
-aptitude update ; aptitude install -y ca-certificates python3-yaml
+aptitude update ; aptitude install -y python3-yaml
 
 gpg --no-default-keyring --keyring /tmp/temp.keyring --keyserver keyserver.ubuntu.com --recv-keys F473DD4473365DE1
 gpg -o /etc/apt/keyrings/matrix.gpg --export --no-default-keyring --keyring /tmp/temp.keyring
@@ -37,8 +37,8 @@ sed -i 's/^server_name/#server_name/' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^pid_file/c\pid_file: "/var/run/matrix-synapse.pid"' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^log_config/c\log_config: "/etc/matrix-synapse/log.yaml"' /etc/matrix-synapse/homeserver.yaml
 sed -i '/^media_store_path/c\media_store_path: "/var/lib/matrix-synapse/media"' /etc/matrix-synapse/homeserver.yaml
-sed -i '/^signing_key_path/c\signing_key_path: "/etc/matrix-synapse/homeserver.signing.key"' /etc/matrix-synapse/homeserver.yaml
-sed -i "s/\/homeserver.db/\/var\/lib\/matrix-synapse\/homeserver.db/" /etc/matrix-synapse/homeserver.yaml
+sed -i 's~example.com.signing.key~homeserver.signing.key~' /etc/matrix-synapse/homeserver.yaml
+sed -i "s~/homeserver.db~/var/lib/matrix-synapse/homeserver.db~" /etc/matrix-synapse/homeserver.yaml
 sed -i -E "/^\s+bind_addresses/c\    bind_addresses: ['0.0.0.0']" /etc/matrix-synapse/homeserver.yaml
 
 # Generate keys
